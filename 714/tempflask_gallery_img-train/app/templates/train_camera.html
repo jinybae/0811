@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Camera App</title>
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css"
+          integrity="sha384-WskhaSGFgHYWDcbwN70/dfYBj47jz9qbsMId/iRN3ewGhXQFZCSftd1LZCfmhktB" crossorigin="anonymous">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700,900" rel="stylesheet">
+    <style>
+        body, html {
+            height: 100%;
+            margin: 0;
+            font-family: 'Roboto', sans-serif;
+            color: #3a3f52;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+        }
+
+        .container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            width: 90%;
+            text-align: center;
+        }
+
+        #camera, #photoPreview {
+            width: 100%;
+            max-width: 450px;
+            height: auto;
+        }
+
+        button {
+            font-size: 20px; /* 크기를 2/3로 줄임 */
+            color: #3a3f52;
+            background-color: #6fec02;
+            padding: 15px 20px; /* 크기를 2/3로 줄임 */
+            margin: 5px; /* 크기를 2/3로 줄임 */
+            border: none;
+            border-radius: 10px;
+            font-weight: 400;
+            letter-spacing: .1em;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        button img {
+            margin-right: 5px; /* 크기를 2/3로 줄임 */
+        }
+
+        .button-container {
+            display: flex;
+            flex-direction: row; /* 버튼을 가로로 배치 */
+            align-items: center;
+            justify-content: center;
+            flex-wrap: wrap; /* 버튼이 작아졌을 때 줄바꿈이 되도록 함 */
+        }
+
+        .hide {
+            display: none;
+        }
+
+        video, img {
+            cursor: pointer;
+        }
+
+        #backButton {
+            position: fixed;
+            top: 10px;
+            left: 10px; /* 기본 코드에 맞춤 */
+            font-size: 20px; /* 크기를 2/3로 줄임 */
+            cursor: pointer;
+            background: none;
+            border: none;
+            color: #3a3f52;
+            padding: 10px; /* 패딩 조정 */
+            width: 70px; /* 버튼 너비 설정 */
+        }
+
+        footer {
+            position: fixed;
+            bottom: 10px;
+            width: 100%;
+            text-align: center;
+            color: #6c757d;
+            font-size: 18px;
+            font-weight: 300;
+        }
+    </style>
+</head>
+<body>
+<!-- Back 버튼 -->
+<button id="backButton" onclick="history.back()">&#60;</button>
+<div class="container">
+    <video id="camera" autoplay muted playsinline></video>
+    <img id="photoPreview" class="hide"/>
+    <div class="button-container">
+        <button id="photoButton"><img src="https://img.icons8.com/material-outlined/24/000000/camera.png"/> Take Photo
+        </button>
+        <button id="switchCameraButton"><img src="https://img.icons8.com/material-outlined/24/000000/switch-camera.png"/> Switch Camera
+        </button>
+        <button id="retakeButton" class="hide">Retake</button>
+        <form id="trainForm" method="POST" enctype="multipart/form-data" action="{{ url_for('save_image') }}">
+            <input type="hidden" name="image" id="imageData">
+            <button type="button" id="TrainButton" class="hide"> Train</button>
+        </form>
+    </div>
+</div>
+<script>
+    const camera = document.getElementById('camera');
+    const photoPreview = document.getElementById('photoPreview');
+    const photoButton = document.getElementById('photoButton');
+    const retakeButton = document.getElementById('retakeButton');
+    const TrainButton = document.getElementById('TrainButton');
+    const switchCameraButton = document.getElementById('switchCameraButton');
+    let stream = null;
+    let currentCamera = 'environment'; // 초기 설정은 후면 카메라
+
+    function startCamera() {
+        navigator.mediaDevices.getUserMedia({video: {facingMode: currentCamera}})
+            .then(function (s) {
+                stream = s;
+                camera.srcObject = stream;
+                photoButton.classList.remove('hide');
+                switchCameraButton.classList.remove('hide');
+            }).catch(function (err) {
+            console.error(err);
+        });
+    }
+
+    startCamera();
+
+    photoButton.onclick = function () {
+        takePhoto();
+    };
+
+    function takePhoto() {
+        const canvas = document.createElement('canvas');
+        canvas.width = camera.videoWidth;
+        canvas.height = camera.videoHeight;
+        const context = canvas.getContext('2d');
+        context.drawImage(camera, 0, 0, canvas.width, canvas.height);
+        const dataUrl = canvas.toDataURL('image/png');
+        photoPreview.src = dataUrl;
+        photoPreview.classList.remove('hide');
+        camera.classList.add('hide');
+        retakeButton.classList.remove('hide');
+        TrainButton.classList.remove('hide');
+        photoButton.classList.add('hide');
+        switchCameraButton.classList.add('hide');
+        document.getElementById('imageData').value = dataUrl; // 이미지 데이터를 숨겨진 필드에 저장
+    }
+
+    retakeButton.onclick = function () {
+        photoPreview.classList.add('hide');
+        retakeButton.classList.add('hide');
+        TrainButton.classList.add('hide');
+        photoButton.classList.remove('hide');
+        switchCameraButton.classList.remove('hide');
+        camera.classList.remove('hide');
+        startCamera();
+    };
+
+    switchCameraButton.onclick = function () {
+        currentCamera = currentCamera === 'user' ? 'environment' : 'user';
+        if (stream) {
+            stream.getTracks().forEach(track => track.stop());
+        }
+        startCamera();
+    };
+
+    TrainButton.onclick = function () {
+        document.getElementById('trainForm').submit();
+    };
+
+    function handleFormSubmit() {
+        alert("저장되었습니다");
+        window.location.href = "{{ url_for('index') }}";
+    }
+
+    document.getElementById('trainForm').onsubmit = handleFormSubmit;
+
+    window.onload = startCamera;
+</script>
+<footer>We are P.P</footer>
+</body>
+</html>

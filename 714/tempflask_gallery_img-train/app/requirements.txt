@@ -1,0 +1,10 @@
+opencv-python-headless
+numpy
+insightface
+scikit-learn
+sounddevice
+scipy
+moviepy
+tqdm
+onnxruntime
+Flask

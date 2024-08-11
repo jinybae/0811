@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Photo Preview</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css"
+          integrity="sha384-WskhaSGFgHYWDcbwN70/dfYBj47jz9qbsMId/iRN3ewGhXQFZCSftd1LZCfmhktB" crossorigin="anonymous">
+    <link href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700,900" rel="stylesheet">
+    <style>
+        body, html {
+            height: 100%;
+            margin: 0;
+            font-family: 'Roboto', sans-serif;
+            color: #3a3f52;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            background-color: #ffffff;
+        }
+
+        .container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            width: 90%;
+            text-align: center;
+        }
+
+        #photoPreview {
+            width: 100%;
+            max-width: 450px;
+            height: auto;
+            margin-bottom: 20px;
+        }
+
+        button {
+            font-size: 20px; /* 크기를 2/3로 줄임 */
+            color: #3a3f52;
+            background-color: #6fec02;
+            padding: 15px 20px; /* 크기를 2/3로 줄임 */
+            margin: 5px; /* 크기를 2/3로 줄임 */
+            border: none;
+            border-radius: 10px;
+            font-weight: 400;
+            letter-spacing: .1em;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .button-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .hide {
+            display: none;
+        }
+
+        #backButton {
+            position: fixed;
+            top: 10px;
+            left: 10px; /* 기본 코드에 맞춤 */
+            font-size: 20px; /* 크기를 2/3로 줄임 */
+            cursor: pointer;
+            background: none;
+            border: none;
+            color: #3a3f52;
+            padding: 10px; /* 패딩 조정 */
+            width: 70px; /* 버튼 너비 설정 */
+        }
+
+        footer {
+            position: fixed;
+            bottom: 10px;
+            width: 100%;
+            text-align: center;
+            color: #6c757d;
+            font-size: 18px;
+            font-weight: 300;
+        }
+    </style>
+</head>
+<body>
+<!-- Back 버튼 -->
+<button id="backButton" onclick="history.back()">&#60;</button>
+<div class="container">
+    <img id="photoPreview" alt="Processed Photo"/>
+    <div class="button-container">
+        <a id="downloadLink" download="output_image.jpg">
+            <button>Download</button>
+        </a>
+    </div>
+</div>
+<footer>We are P.P</footer>
+<script>
+    const photoPreview = document.getElementById('photoPreview');
+    const downloadLink = document.getElementById('downloadLink');
+
+    const processedPhoto = '/output/output_image.jpg';
+
+    if (processedPhoto) {
+        photoPreview.src = processedPhoto;
+        downloadLink.href = processedPhoto;
+        downloadLink.download = 'output_image.jpg';
+    } else {
+        alert('No photo found');
+        window.location.href = 'gallery.html';
+    }
+</script>
+</body>
+</html>
